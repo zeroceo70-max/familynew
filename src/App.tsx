@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
+import { LogOut, Menu } from "lucide-react";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL!,
@@ -18,18 +19,21 @@ export default function App() {
   const [dob, setDob] = useState("");
 
   useEffect(() => {
+    // Check current session
     supabase.auth.getSession().then(({ data }) => {
       setUser(data.session?.user ?? null);
       if (data.session?.user) fetchProfile(data.session.user.id);
     });
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    // Listen to auth changes
+    const { data: listener } = supabase.auth.onAuthStateChange((_, session) => {
       setUser(session?.user ?? null);
       if (session?.user) fetchProfile(session.user.id);
       else setProfile(null);
     });
 
-   listener.subscription.unsubscribe()
+    // Cleanup subscription
+    return () => listener.subscription.unsubscribe();
   }, []);
 
   const fetchProfile = async (id: string) => {
@@ -41,13 +45,14 @@ export default function App() {
     e.preventDefault();
     try {
       if (isLogin) {
-        await supabase.auth.signInWithPassword({ email, password });
-      } else {
-        const { data, error } = await supabase.auth.signUp({ email, password });
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        if (data.user) {
+      } else {
+        const { error } = await supabase.auth.signUp({ email, password });
+        if (error) throw error;
+        if (user) {
           await supabase.from("profiles").insert({
-            id: data.user.id,
+            id: user.id,
             first_name: firstName,
             last_name: lastName,
             date_of_birth: dob,
@@ -60,100 +65,100 @@ export default function App() {
     }
   };
 
-  const signOut = () => supabase.auth.signOut();
+  const signOut = async () => {
+    await supabase.auth.signOut();
+  };
 
   return (
     <>
       {/* Header */}
-      <header className="absolute top-0 right-0 p-6 z-50">
-        {user ? (
-          <div className="flex items-center gap-4">
-            <span className="text-lg font-semibold text-gray-800">
-              Welcome, {profile?.first_name || "User"}!
-            </span>
-            <button
-              onClick={signOut}
-              className="rounded-lg bg-red-600 px-5 py-2.5 text-white font-medium hover:bg-red-700"
-            >
-              Sign Out
-            </button>
+      <header className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-sm shadow-sm z-50">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-green-500 bg-clip-text text-transparent">
+            FamilyShare
+          </h1>
+          <div className="flex items-center gap-6">
+            {user ? (
+              <div className="flex items-center gap-4">
+                <span className="font-medium">Welcome, {profile?.first_name || "User"}!</span>
+                <button onClick={signOut} className="flex items-center gap-2 text-red-600 hover:text-red-700 font-medium">
+                  <LogOut size={20} />
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <>
+                <button onClick={() => { setIsLogin(true); setShowAuth(true); }} className="text-blue-600 font-semibold hover:underline">
+                  Log In
+                </button>
+                <button onClick={() => { setIsLogin(false); setShowAuth(true); }} className="bg-gradient-to-r from-blue-600 to-green-600 text-white px-6 py-2.5 rounded-xl font-medium hover:shadow-lg transition">
+                  Sign Up Free
+                </button>
+              </>
+            )}
           </div>
-        ) : (
-          <div className="flex gap-4">
-            <button
-              onClick={() => { setIsLogin(true); setShowAuth(true); }}
-              className="text-blue-600 font-semibold hover:underline"
-            >
-              Log In
-            </button>
-            <button
-              onClick={() => { setIsLogin(false); setShowAuth(true); }}
-              className="rounded-lg bg-blue-600 px-6 py-2.5 text-white font-medium hover:bg-blue-700"
-            >
-              Sign Up Free
-            </button>
-          </div>
-        )}
+        </div>
       </header>
 
-      {/* Landing Page */}
-      <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex flex-col items-center justify-center px-6 pt-20 text-center">
-        <h1 className="text-8xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-green-500 mb-8">
-          FamilyShare
-        </h1>
-        <p className="text-4xl font-bold text-gray-800 mb-12">
+      {/* Hero Landing */}
+      <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex flex-col items-center justify-center px-6 pt-24 text-center">
+        <h2 className="text-7xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-green-500 mb-6">
           Safety Through Trust and Consent
-        </p>
-        <p className="max-w-3xl text-xl text-gray-700 mb-12">
+        </h2>
+        <p className="text-2xl text-gray-700 max-w-4xl mb-12">
           FamilyShare is the privacy-first family safety app. Connect with your loved ones without compromising their privacy. No secret tracking, ever.
         </p>
-
-        <button className="rounded-xl bg-gradient-to-r from-blue-600 to-green-600 px-10 py-5 text-2xl font-bold text-white shadow-xl hover:shadow-2xl mb-16">
+        <button className="bg-gradient-to-r from-blue-600 to-green-600 text-white px-12 py-5 rounded-2xl text-2xl font-bold shadow-2xl hover:shadow-3xl transition mb-20">
           Create Your Family Circle
         </button>
 
-        <h2 className="text-4xl font-bold text-gray-800 mb-12">
+        <h3 className="text-5xl font-bold text-gray-800 mb-16">
           Ethical Features Designed for Your Peace of Mind
-        </h2>
+        </h3>
 
-        <div className="grid max-w-5xl grid-cols-1 md:grid-cols-2 gap-10">
-          {/* Repeat for each feature */}
-          <div className="bg-white p-10 rounded-2xl shadow-lg">
-            <h3 className="text-2xl font-bold text-blue-600 mb-4">Consent-Based Sharing</h3>
-            <p className="text-gray-700">
-              Create private Family Circles where every member must accept an invitation. You control who sees your location, and for how long.
-            </p>
-          </div>
-          {/* ... other three features exactly as you wrote ... */}
+        <div className="grid md:grid-cols-2 gap-10 max-w-6xl">
+          {[
+            { title: "Consent-Based Sharing", color: "blue" },
+            { title: "Polite Check-In Requests", color: "green" },
+            { title: "Public Safety Alerts", color: "purple" },
+            { title: "Supervised Accounts", color: "orange" }
+          ].map((f) => (
+            <div key={f.title} className="bg-white p-10 rounded-3xl shadow-xl hover:shadow-2xl transition">
+              <h4 className={`text-3xl font-bold text-${f.color}-600 mb-4`}>{f.title}</h4>
+              <p className="text-gray-700 text-lg">
+                Full control, explicit consent, and transparency at every step.
+              </p>
+            </div>
+          ))}
         </div>
 
-        <footer className="mt-20 text-gray-600">
+        <footer className="mt-24 text-gray-600 text-lg">
           © 2025 FamilyShare. All Rights Reserved. Your privacy is our priority.
         </footer>
       </main>
 
       {/* Auth Modal */}
       {showAuth && !user && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl p-10 max-w-md w-full shadow-2xl">
-            <h2 className="text-3xl font-bold mb-8 text-center">
-              {isLogin ? "Welcome Back" : "Create Your Account"}
+            <h2 className="text-4xl font-bold text-center mb-8">
+              {isLogin ? "Welcome Back" : "Join FamilyShare"}
             </h2>
-            <form onSubmit={handleAuth} className="space-y-5">
+            <form onSubmit={handleAuth} className="space-y-6">
               {!isLogin && (
                 <>
-                  <input placeholder="First Name" required value={firstName} onChange={e => setFirstName(e.target.value)} className="w-full px-5 py-3 border rounded-xl" />
-                  <input placeholder="Last Name" required value={lastName} onChange={e => setLastName(e.target.value)} className="w-full px-5 py-3 border rounded-xl" />
-                  <input type="date" required value={dob} onChange={e => setDob(e.target.value)} className="w-full px-5 py-3 border rounded-xl" />
+                  <input required placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="w-full px-5 py-4 border border-gray-300 rounded-xl text-lg" />
+                  <input required placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} className="w-full px-5 py-4 border border-gray-300 rounded-xl text-lg" />
+                  <input required type="date" value={dob} onChange={(e) => setDob(e.target.value)} className="w-full px-5 py-4 border border-gray-300 rounded-xl text-lg" />
                 </>
               )}
-              <input type="email" placeholder="Email" required value={email} onChange={e => setEmail(e.target.value)} className="w-full px-5 py-3 border rounded-xl" />
-              <input type="password" placeholder="Password" required value={password} onChange={e => setPassword(e.target.value)} className="w-full px-5 py-3 border rounded-xl" />
-              <button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-green-600 text-white py-4 rounded-xl font-bold text-xl">
+              <input required type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-5 py-4 border border-gray-300 rounded-xl text-lg" />
+              <input required type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-5 py-4 border border-gray-300 rounded-xl text-lg" />
+              <button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-green-600 text-white py-5 rounded-xl font-bold text-xl hover:shadow-xl transition">
                 {isLogin ? "Log In" : "Create Account"}
               </button>
             </form>
-            <button onClick={() => setShowAuth(false)} className="mt-6 text-gray-600 w-full">
+            <button onClick={() => setShowAuth(false)} className="mt-6 text-gray-600 w-full text-center">
               Cancel
             </button>
           </div>
