@@ -29,7 +29,7 @@ export default function App() {
       else setProfile(null);
     });
 
-    return () => listener.subscription.unsubscribe();
+    listener?.unsubscribe();
   }, []);
 
   const fetchProfile = async (id: string) => {
