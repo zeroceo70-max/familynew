@@ -1,0 +1,9 @@
+{
+  "name": "FamilyShare",
+  "description": "FamilyShare is a 100% consent-based family locator and safety tool. It's built with a privacy-first philosophy, ensuring no secret tracking ever occurs. Connect with loved ones with full transparency and control.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
