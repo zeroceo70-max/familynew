@@ -1,10 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-
-* {
+/* Global resets & smooth experience */
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -19,9 +22,10 @@ body {
   background: linear-gradient(135deg, #f0f9ff 0%, #f0fdf4 100%);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Beautiful gradients */
+/* Beautiful custom gradients */
 .bg-gradient-primary {
   background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
 }
@@ -34,16 +38,23 @@ body {
   @apply bg-gradient-to-r from-blue-600 to-green-500 bg-clip-text text-transparent;
 }
 
-/* Shadow & hover effects */
+/* Card shadows & hover lift */
 .shadow-card {
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 .hover-lift {
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hover-lift:hover {
-  transform: translateY(-8px);
+  transform: translateY(-10px);
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Focus styles for accessibility */
+input:focus,
+button:focus-visible {
+  outline: 3px solid rgba(59, 130, 246, 0.5);
+  outline-offset: 2px;
 }
