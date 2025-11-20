@@ -1,9 +1,29 @@
 {
   "name": "FamilyShare",
-  "description": "FamilyShare is a 100% consent-based family locator and safety tool. It's built with a privacy-first philosophy, ensuring no secret tracking ever occurs. Connect with loved ones with full transparency and control.",
-  "requestFramePermissions": [
-    "camera",
-    "microphone",
-    "geolocation"
+  "short_name": "FamilyShare",
+  "description": "FamilyShare is a 100% consent-based family locator and safety tool. No secret tracking, ever.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
